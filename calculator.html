@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stylish Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at top left, #1e3a8a, #0f172a);
+      color: #fff;
+    }
+
+    .calculator {
+      width: 340px;
+      padding: 20px;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot.red { background: #ef4444; }
+    .dot.yellow { background: #facc15; }
+    .dot.green { background: #22c55e; }
+
+    .heading {
+      flex: 1;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #f8fafc;
+    }
+
+    .display {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 20px;
+      font-size: 2rem;
+      text-align: right;
+      min-height: 60px;
+      margin-bottom: 18px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+      word-wrap: break-word;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 15px;
+      padding: 20px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all 0.2s ease-in-out;
+    }
+
+    button:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6), 0 0 8px #38bdf8;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .key.operator {
+      background: linear-gradient(135deg,#6366f1,#3b82f6);
+    }
+
+    .key.equal {
+      background: linear-gradient(135deg,#22c55e,#16a34a);
+      grid-column: span 2;
+    }
+
+    .key.zero {
+      grid-column: span 2;
+    }
+
+    .key.action {
+      background: linear-gradient(135deg,#f43f5e,#e11d48);
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <!-- top bar -->
+    <div class="top-bar">
+      <div class="dots">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+      </div>
+      <div class="heading">Calculator</div>
+    </div>
+
+    <!-- display -->
+    <div class="display" id="display">0</div>
+
+    <!-- keys -->
+    <section class="keys">
+      <button class="key action" data-action="clear">AC</button>
+      <button class="key action" data-action="back">⌫</button>
+      <button class="key action" data-action="percent">%</button>
+      <button class="key operator" data-action="operator">÷</button>
+
+      <button class="key" data-number="7">7</button>
+      <button class="key" data-number="8">8</button>
+      <button class="key" data-number="9">9</button>
+      <button class="key operator" data-action="operator">×</button>
+
+      <button class="key" data-number="4">4</button>
+      <button class="key" data-number="5">5</button>
+      <button class="key" data-number="6">6</button>
+      <button class="key operator" data-action="operator">−</button>
+
+      <button class="key" data-number="1">1</button>
+      <button class="key" data-number="2">2</button>
+      <button class="key" data-number="3">3</button>
+      <button class="key operator" data-action="operator">+</button>
+
+      <button class="key zero" data-number="0">0</button>
+      <button class="key" data-number=".">.</button>
+      <button class="key equal" data-action="equal">=</button>
+    </section>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const buttons = document.querySelectorAll("button");
+
+    let current = "";
+    let resetNext = false;
+
+    function updateDisplay(value) {
+      display.innerText = value;
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const number = btn.getAttribute("data-number");
+        const action = btn.getAttribute("data-action");
+
+        if (number !== null) {
+          if (display.innerText === "0" || resetNext) {
+            current = number;
+            resetNext = false;
+          } else {
+            current += number;
+          }
+          updateDisplay(current);
+        } 
+        else if (action === "operator") {
+          current += ` ${btn.innerText} `;
+          updateDisplay(current);
+          resetNext = false;
+        } 
+        else if (action === "clear") {
+          current = "";
+          updateDisplay("0");
+        } 
+        else if (action === "back") {
+          current = current.trim().slice(0, -1);
+          updateDisplay(current || "0");
+        } 
+        else if (action === "percent") {
+          try {
+            current = String(eval(current) / 100);
+            updateDisplay(current);
+          } catch {
+            updateDisplay("Error");
+          }
+        } 
+        else if (action === "equal") {
+          try {
+            const expression = current.replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
+            current = String(eval(expression));
+            updateDisplay(current);
+            resetNext = true;
+          } catch {
+            updateDisplay("Error");
+            current = "";
+          }
+        }
+      });
+    });
+
+    // Keyboard support
+    document.addEventListener("keydown", e => {
+      if ((e.key >= "0" && e.key <= "9") || e.key === ".") {
+        if (display.innerText === "0" || resetNext) {
+          current = e.key;
+          resetNext = false;
+        } else {
+          current += e.key;
+        }
+        updateDisplay(current);
+      } else if (["+", "-", "*", "/"].includes(e.key)) {
+        current += ` ${e.key} `;
+        updateDisplay(current);
+      } else if (e.key === "Enter") {
+        try {
+          const expression = current.replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
+          current = String(eval(expression));
+          updateDisplay(current);
+          resetNext = true;
+        } catch {
+          updateDisplay("Error");
+          current = "";
+        }
+      } else if (e.key === "Backspace") {
+        current = current.trim().slice(0, -1);
+        updateDisplay(current || "0");
+      } else if (e.key.toLowerCase() === "c") {
+        current = "";
+        updateDisplay("0");
+      }
+    });
+  </script>
+</body>
+</html>
